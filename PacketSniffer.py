@@ -2,6 +2,10 @@ import socket
 import struct
 import textwrap
 
+def get_mac_addr(bytes_addr):
+    # Convert a MAC address from bytes to a readable string
+    return ':'.join(format(b, '02x') for b in bytes_addr)
+
 # Unpack ethernet frame
 def ethernet_frame(data):
     dest_mac, src_mac, proto = struct.unpack('! 6s 6s H', data[:14])
