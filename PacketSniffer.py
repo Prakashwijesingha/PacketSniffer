@@ -1,20 +1,5 @@
 import socket
 import struct
-import textwrap
-
-# Create a raw socket and bind it to the public interface
-def main():
-    conn = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
-    
-    while True:
-        # Receive data from the socket
-        raw_data, addr = conn.recvfrom(65536)
-        
-        # Unpack the ethernet frame
-        dest_mac, src_mac, eth_proto, data = ethernet_frame(raw_data)
-        print('\nEthernet Frame: ')
-        print('Destination: {}, Source: {}, Protocol: {}'.format(dest_mac, src_mac, eth_proto))
-    
 
 # Unpack ethernet frame
 def ethernet_frame(data):
@@ -26,5 +11,22 @@ def get_mac_addr(bytes_addr):
     bytes_str = map('{:02x}'.format, bytes_addr)
     mac_addr = ':'.join(bytes_str).upper()
     return mac_addr
-    
 
+def main():
+    # Replace 'YOUR_INTERFACE_IP' with your actual interface IP address
+    conn = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
+    conn.bind(("YOUR_INTERFACE_IP", 0))
+    conn.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    conn.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
+    
+    while True:
+        # Receive data from the socket
+        raw_data, addr = conn.recvfrom(65536)
+        
+        # Unpack the ethernet frame
+        dest_mac, src_mac, eth_proto, data = ethernet_frame(raw_data)
+        print('\nEthernet Frame:')
+        print(f'Destination: {dest_mac}, Source: {src_mac}, Protocol: {eth_proto}')
+
+if __name__ == "__main__":
+    main()
